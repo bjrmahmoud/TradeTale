@@ -25,6 +25,7 @@ interface TradeAutopsyViewProps {
   onSelectTrade: (id: string) => void;
   onUpdateTrade: (id: string, updates: Partial<Trade>) => void;
   onUpdateChart: (slot: 'pre' | 'post', imageUrl: string) => void;
+  onBackToPulse?: () => void;
 }
 
 export const TradeAutopsyView: React.FC<TradeAutopsyViewProps> = ({
@@ -33,6 +34,7 @@ export const TradeAutopsyView: React.FC<TradeAutopsyViewProps> = ({
   onSelectTrade,
   onUpdateTrade,
   onUpdateChart,
+  onBackToPulse,
 }) => {
   if (!trade) return null;
 
@@ -87,9 +89,17 @@ export const TradeAutopsyView: React.FC<TradeAutopsyViewProps> = ({
 
   return (
     <div className="space-y-6 max-w-[1720px] mx-auto px-4 sm:px-6 py-6 select-none">
-      {/* Top Breadcrumb & Next/Prev Pagination Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-obsidian-surface border border-obsidian-border p-4 rounded-xl">
+      {/* Top Breadcrumb & Return to Pulse Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-obsidian-surface border border-obsidian-border p-4 rounded-xl shadow-sm">
         <div className="flex items-center gap-3">
+          {onBackToPulse && (
+            <button
+              onClick={onBackToPulse}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-obsidian-base hover:bg-obsidian-highlight text-trade-emerald border border-trade-emerald/40 transition-colors shadow-sm mr-2"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" /> Return to Daily Pulse
+            </button>
+          )}
           <span className="font-mono text-xs text-obsidian-slate bg-obsidian-base px-2.5 py-1 rounded-md border border-obsidian-highlight">
             CASE STUDY #{trade.id}
           </span>

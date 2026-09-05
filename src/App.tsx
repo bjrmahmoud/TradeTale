@@ -6,7 +6,7 @@ import { DailyPulseDashboard } from './components/dashboard/DailyPulseDashboard'
 import { TradeAutopsyView } from './components/autopsy/TradeAutopsyView';
 import { DisciplineAnalyticsView } from './components/analytics/DisciplineAnalyticsView';
 import { PlaybookMatrixView } from './components/playbook/PlaybookMatrixView';
-import { ThreeActTradeLoggerModal } from './components/logger/ThreeActTradeLoggerModal';
+import { StreamlinedTradeLoggerModal } from './components/logger/StreamlinedTradeLoggerModal';
 import { GlobalCommandDialog } from './components/search/GlobalCommandDialog';
 import { AuthModal } from './components/auth/AuthModal';
 
@@ -93,6 +93,7 @@ function TradestoryApp() {
             onSelectTrade={(id) => setSelectedTradeId(id)}
             onUpdateTrade={updateTrade}
             onUpdateChart={(slot, imageUrl) => updateChartImage(selectedTrade.id, slot, imageUrl)}
+            onBackToPulse={() => setActiveTab('dashboard')}
           />
         )}
 
@@ -105,8 +106,8 @@ function TradestoryApp() {
         )}
       </main>
 
-      {/* 3-Act Narrative Trade Logger Modal */}
-      <ThreeActTradeLoggerModal
+      {/* Streamlined 2-Step Visual Trade Logger Modal */}
+      <StreamlinedTradeLoggerModal
         isOpen={isLoggerOpen}
         onClose={() => setIsLoggerOpen(false)}
         onSaveTrade={addTrade}

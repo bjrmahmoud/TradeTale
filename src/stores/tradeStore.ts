@@ -73,12 +73,33 @@ export function useTradeStore(user: AuthUser | null) {
     // 1. Optimistic local update
     setTrades((prev) => [trade, ...prev]);
     setSelectedTradeId(trade.id);
-    setActiveTab('autopsy');
+    setActiveTab('dashboard'); // Auto-redirect to Daily Pulse as specified
 
     // 2. Commit to Cloud Firestore
     const uid = user ? user.uid : 'guest_trader';
     await saveTradeToFirestore(uid, trade);
     setIsCloudSynced(true);
+
+    // 3. Upload charts to Firebase Storage in background if needed
+    if (trade.preChartUrl?.startsWith('data:') || trade.postChartUrl?.startsWith('data:')) {
+      let updatedPre = trade.preChartUrl;
+      let updatedPost = trade.postChartUrl;
+
+      if (trade.preChartUrl?.startsWith('data:')) {
+        updatedPre = await uploadChartToFirebaseStorage(uid, trade.id, 'pre', trade.preChartUrl);
+      }
+      if (trade.postChartUrl?.startsWith('data:')) {
+        updatedPost = await uploadChartToFirebaseStorage(uid, trade.id, 'post', trade.postChartUrl);
+      }
+
+      if (updatedPre !== trade.preChartUrl || updatedPost !== trade.postChartUrl) {
+        const cloudUpdates = { preChartUrl: updatedPre, postChartUrl: updatedPost };
+        setTrades((prev) =>
+          prev.map((t) => (t.id === trade.id ? { ...t, ...cloudUpdates } : t))
+        );
+        await updateTradeInFirestore(trade.id, cloudUpdates);
+      }
+    }
   };
 
   const updateTrade = async (id: string, updates: Partial<Trade>) => {
