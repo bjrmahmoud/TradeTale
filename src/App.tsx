@@ -20,8 +20,8 @@ import { AuthMode } from './types/auth';
 function TradestoryApp() {
   const { user, signOutUser } = useAuth();
   
-  // High-level navigation state: Landing presentation page vs Live terminal
-  const [viewMode, setViewMode] = useState<'landing' | 'terminal'>('terminal');
+  // High-level navigation state: Landing Overview presentation page as the primary entrance
+  const [viewMode, setViewMode] = useState<'landing' | 'terminal'>('landing');
 
   // Modals state
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
@@ -57,7 +57,12 @@ function TradestoryApp() {
   useEffect(() => {
     if (user?.uid) {
       UserRuleService.fetchRemoteUserRules(user.uid).then((remoteRules) => {
-        if (remoteRules) setUserRules(remoteRules);
+        if (remoteRules) {
+          setUserRules(remoteRules);
+          if (!remoteRules.isOnboardingCompleted) {
+            setIsOnboardingOpen(true);
+          }
+        }
       });
     }
   }, [user]);
@@ -88,11 +93,12 @@ function TradestoryApp() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isLoggerOpen, setIsSearchOpen, setIsLoggerOpen]);
 
-  // If in Landing Mode, render the high-conversion Landing Page
+  // If in Landing Mode, render the high-conversion Landing Overview Page
   if (viewMode === 'landing') {
     return (
       <div className="min-h-screen bg-obsidian-base text-slate-100 flex flex-col font-sans">
         <LandingPage
+          isAuthenticated={Boolean(user && !user.isAnonymous)}
           onLaunchTerminal={() => setViewMode('terminal')}
           onOpenLogin={() => {
             setAuthInitialMode('signin');
@@ -140,7 +146,10 @@ function TradestoryApp() {
           setAuthInitialMode('signin');
           setIsAuthOpen(true);
         }}
-        onSignOut={signOutUser}
+        onSignOut={async () => {
+          await signOutUser();
+          setViewMode('landing');
+        }}
         onOpenRules={() => setIsOnboardingOpen(true)}
         onOpenBrokerVault={() => setIsBrokerVaultOpen(true)}
         onGoToLanding={() => setViewMode('landing')}
@@ -191,6 +200,7 @@ function TradestoryApp() {
         }}
         onSaveTrade={addTrade}
         initialExecution={activeBrokerExecution}
+        mainJournalingQuestion={userRules.mainJournalingQuestion}
       />
 
       {/* Cmd+K Global Command Search Palette */}

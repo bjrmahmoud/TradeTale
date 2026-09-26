@@ -188,23 +188,21 @@ Located at [src/lib/chartGenerator.ts](file:///c:/Users/Mahmoud/Desktop/TradeTal
 
 ### 3.9 Module 9: Landing & Presentation Page (Root Entry)
 Located at [src/components/landing/LandingPage.tsx](file:///c:/Users/Mahmoud/Desktop/TradeTale/src/components/landing/LandingPage.tsx).
-- High-conversion public front door and educational showcase.
-- Highlights the project vision ("Separate Market Randomness from Execution Discipline").
-- Interactive demonstration of the 3 Core Quantitative Foundations ($R$-normalization, Discipline Leak Delta, and Expectancy).
+- High-conversion public front door and mandatory authentication gateway for all operators.
+- Presents the core project philosophy ("Separate Market Randomness from Execution Discipline") and quantitative models ($R$-multiples, Discipline Leak Delta, Expectancy).
+- Unauthenticated visitors are guided directly to either **"Create Free Account"** (starts registration $\rightarrow$ immediately launches the 4-Question Interactive Blueprint) or **"Log In to Existing Account"**.
 - Interactive tabbed feature switcher previewing the 3-Act Logger, Trade Autopsy Split-View, and Discipline Overlay Curve.
-- One-click CTA triggers leading to **"Launch Terminal"**, **"Sign In"**, or **"Create Account"**.
 
 ---
 
-### 3.10 Module 10: First-Time User Onboarding & Dynamic Rule Builder
+### 3.10 Module 10: 4-Step Interactive Discipline Blueprint (Q&A Wizard)
 Located at [src/components/onboarding/OnboardingWizardModal.tsx](file:///c:/Users/Mahmoud/Desktop/TradeTale/src/components/onboarding/OnboardingWizardModal.tsx) and [src/services/userRuleService.ts](file:///c:/Users/Mahmoud/Desktop/TradeTale/src/services/userRuleService.ts).
-- 5-step interactive onboarding wizard triggered automatically upon user registration or launched manually from the top command bar:
-  1. **Trading Identity & Primary Asset Focus** (Futures, Forex, Equities, Crypto + Scalper/Day/Swing style).
-  2. **Risk Budgeting & Safety Gate** (1R risk budget in USD/%, daily drawdown ceiling $-3.0R$, profit target).
-  3. **Allowed Session Windows** (Tokyo, London, NY AM, NY Lunch, NY PM).
-  4. **Psychological Defense & Prohibited Emotions** (FOMO, Revenge, Chasing, Hesitation).
-  5. **Structural Stop-Loss & Non-Negotiable Golden Rules** (Hard stops, no moving stops, candle confirmation, custom rules).
-- Synchronizes user rules to Firestore (`user_trading_rules` collection) and local cache, dynamically feeding the Daily Drawdown Risk Gate.
+- 4-question interactive wizard triggered automatically upon registration or accessible anytime via the **"Rules"** button:
+  1. **Question 1: Strategy Used**: Selection of primary setup models (Fair Value Gap / FVG & Liquidity Sweep, Opening Range Breakout / ORB, Supply & Demand Order Blocks, VWAP Reversion, Break & Retest, or Custom Strategy) plus minimum planned R:R ratio.
+  2. **Question 2: The Session**: Approved market session windows (New York AM Open 09:30–11:30, London Open 03:00–07:00, New York PM Close 13:30–16:00, Tokyo/Asia) with active warning banners against the NY Lunch Chop window.
+  3. **Question 3: Number of Trades Taken & Position Sizing**: Enforcing maximum trades allowed per session (2 Sniper, 3 Standard, 5 Scalper) and maximum contract/lot sizing per trade to prevent overtrading.
+  4. **Question 4: The Main Question Asked When Journaling a Trade**: Trader selects or writes their #1 signature post-mortem question (e.g., *"Did I wait for structural confirmation, or did I enter impulsively out of FOMO?"*), which is anchored at the top of every Act III Autopsy.
+- Synchronizes user rules to Firestore (`user_trading_rules` collection) and local cache, dynamically feeding the Daily Drawdown Risk Gate and Trade Logger.
 
 ---
 

@@ -20,20 +20,32 @@ import {
   Server,
   Play,
   RotateCcw,
+  UserCheck,
+  LogIn,
 } from 'lucide-react';
 
 interface LandingPageProps {
   onLaunchTerminal: () => void;
   onOpenLogin: () => void;
   onOpenRegister: () => void;
+  isAuthenticated?: boolean;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onLaunchTerminal,
   onOpenLogin,
   onOpenRegister,
+  isAuthenticated = false,
 }) => {
   const [activeFeatureTab, setActiveFeatureTab] = useState<'logger' | 'autopsy' | 'analytics' | 'broker'>('logger');
+
+  const handleTerminalClick = () => {
+    if (isAuthenticated) {
+      onLaunchTerminal();
+    } else {
+      onOpenLogin();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-obsidian-base text-slate-100 flex flex-col font-sans selection:bg-trade-emerald selection:text-black">
@@ -42,7 +54,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           {/* Logo & Brand */}
           <div
-            onClick={onLaunchTerminal}
+            onClick={handleTerminalClick}
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-obsidian-highlight bg-obsidian-card p-0.5 shadow-lg group-hover:border-trade-emerald transition-colors">
@@ -86,34 +98,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </a>
           </nav>
 
-          {/* Action CTAs */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onOpenLogin}
-              className="px-3 py-1.5 text-xs font-mono text-slate-300 hover:text-white transition-colors"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={onOpenRegister}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono bg-obsidian-card hover:bg-obsidian-highlight border border-trade-emerald/40 text-trade-emerald transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Create Account</span>
-            </button>
-            <button
-              onClick={onLaunchTerminal}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald transition-all transform active:scale-95"
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Launch Terminal</span>
-            </button>
+          {/* Action CTAs: Login or Register */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {isAuthenticated ? (
+              <button
+                onClick={onLaunchTerminal}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald transition-all transform active:scale-95"
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>Enter Terminal</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={onOpenLogin}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-slate-200 hover:text-white transition-colors"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-trade-emerald" />
+                  <span>Log In</span>
+                </button>
+                <button
+                  onClick={onOpenRegister}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-mono font-semibold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald transition-all transform active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Create Account</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-16 pb-20 sm:pt-24 sm:pb-28 overflow-hidden border-b border-obsidian-border/50">
+      <section className="relative pt-14 pb-20 sm:pt-20 sm:pb-28 overflow-hidden border-b border-obsidian-border/50">
         {/* Subtle Background Glow */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-trade-emerald/15 to-trade-cyan/10 rounded-full blur-[130px] pointer-events-none" />
 
@@ -139,23 +158,46 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <strong className="text-trade-rose">Discipline Leak</strong>, and autopsies every trade through a structured 3-act narrative before tilt destroys your capital.
           </p>
 
-          {/* CTAs Group */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <button
-              onClick={onLaunchTerminal}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-mono text-sm font-bold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5"
-            >
-              <Terminal className="w-4 h-4" />
-              <span>Launch Live Terminal</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={onOpenRegister}
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl font-mono text-sm font-semibold bg-obsidian-card hover:bg-obsidian-highlight border border-obsidian-border hover:border-slate-600 text-slate-200 flex items-center justify-center gap-2 transition-all"
-            >
-              <Sparkles className="w-4 h-4 text-trade-emerald" />
-              <span>Create Free Account</span>
-            </button>
+          {/* MAIN ENTRANCE GATEWAY: CREATE ACCOUNT OR LOGIN */}
+          <div className="max-w-xl mx-auto mb-14 p-5 sm:p-6 rounded-2xl bg-obsidian-card/90 border border-trade-emerald/40 shadow-2xl backdrop-blur-md">
+            <div className="text-left mb-4">
+              <span className="text-[11px] font-mono uppercase text-trade-emerald font-bold tracking-wider block mb-1">
+                ⚡ OPERATOR AUTHENTICATION REQUIRED
+              </span>
+              <p className="text-xs text-slate-300 font-sans">
+                To access the live terminal, execute 3-act autopsies, and calibrate your personalized trading blueprint:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={onOpenRegister}
+                className="py-3 px-4 rounded-xl font-mono text-xs font-bold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Create New Account</span>
+              </button>
+              <button
+                onClick={onOpenLogin}
+                className="py-3 px-4 rounded-xl font-mono text-xs font-semibold bg-obsidian-base hover:bg-obsidian-highlight border border-obsidian-border hover:border-slate-500 text-slate-200 flex items-center justify-center gap-2 transition-all"
+              >
+                <LogIn className="w-4 h-4 text-trade-emerald" />
+                <span>Log In to Existing Account</span>
+              </button>
+            </div>
+
+            {isAuthenticated && (
+              <div className="mt-3 pt-3 border-t border-obsidian-border flex items-center justify-between text-xs font-mono text-trade-emerald">
+                <span>✓ Currently Authenticated</span>
+                <button
+                  onClick={onLaunchTerminal}
+                  className="font-bold underline hover:text-emerald-300 flex items-center gap-1"
+                >
+                  <span>Go to Terminal</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Live Telemetry Ticker Ribbon */}
@@ -348,10 +390,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </li>
                   </ul>
                   <button
-                    onClick={onLaunchTerminal}
+                    onClick={handleTerminalClick}
                     className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-obsidian-highlight hover:bg-slate-700 text-white transition-colors"
                   >
-                    <span>Test Logger in Terminal</span>
+                    <span>{isAuthenticated ? 'Open Logger in Terminal' : 'Sign In to Try Logger'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -409,10 +451,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </li>
                   </ul>
                   <button
-                    onClick={onLaunchTerminal}
+                    onClick={handleTerminalClick}
                     className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-obsidian-highlight hover:bg-slate-700 text-white transition-colors"
                   >
-                    <span>Inspect Live Autopsy</span>
+                    <span>{isAuthenticated ? 'Inspect Live Autopsy' : 'Sign In to View Autopsy'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -466,10 +508,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </li>
                   </ul>
                   <button
-                    onClick={onLaunchTerminal}
+                    onClick={handleTerminalClick}
                     className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-obsidian-highlight hover:bg-slate-700 text-white transition-colors"
                   >
-                    <span>View Analytics in Terminal</span>
+                    <span>{isAuthenticated ? 'View Discipline Curve' : 'Sign In for Analytics'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -527,10 +569,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </li>
                   </ul>
                   <button
-                    onClick={onLaunchTerminal}
+                    onClick={handleTerminalClick}
                     className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-obsidian-highlight hover:bg-slate-700 text-white transition-colors"
                   >
-                    <span>Open Broker Vault</span>
+                    <span>{isAuthenticated ? 'Open Broker Vault' : 'Sign In to Connect Broker'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -631,21 +673,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             Stop Guessing. Start Autopsying With Precision.
           </h3>
           <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mb-10 font-sans">
-            Join the traders who separate process discipline from market luck. Launch the terminal right now or create your personalized trading rule set.
+            Join the traders who separate process discipline from market luck. Create your account to establish your personalized trading rule set.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={onLaunchTerminal}
+              onClick={onOpenRegister}
               className="w-full sm:w-auto px-8 py-4 rounded-xl font-mono text-sm font-bold bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5"
             >
-              <Terminal className="w-4 h-4" />
-              <span>Launch Live Terminal Now</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Create Free Account & Build Rules</span>
             </button>
             <button
-              onClick={onOpenRegister}
-              className="w-full sm:w-auto px-8 py-4 rounded-xl font-mono text-sm font-semibold bg-obsidian-card hover:bg-obsidian-highlight border border-obsidian-border text-slate-200 transition-colors"
+              onClick={onOpenLogin}
+              className="w-full sm:w-auto px-8 py-4 rounded-xl font-mono text-sm font-semibold bg-obsidian-card hover:bg-obsidian-highlight border border-obsidian-border text-slate-200 flex items-center justify-center gap-2 transition-colors"
             >
-              <span>Create Free Account</span>
+              <LogIn className="w-4 h-4 text-trade-emerald" />
+              <span>Log In to Existing Account</span>
             </button>
           </div>
         </div>

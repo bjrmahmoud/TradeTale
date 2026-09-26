@@ -6,27 +6,34 @@ export interface UserTradingRules {
   tradingStyle: 'scalper' | 'day_trader' | 'swing_trader';
   primaryAssetClass: AssetClass;
   
-  // Risk Budgeting
+  // Strategy Used
+  primaryStrategies: string[];
+  customStrategyName?: string;
+  minPlannedRR: number;         // e.g. 2.0 (1:2 R:R)
+
+  // Session Restrictions
+  allowedSessions: SessionType[];
+
+  // Number of Trades & Position Sizing
+  maxTradesPerDay: number;      // e.g. 3 trades per session
+  maxContractsPerTrade: number; // e.g. 2 contracts / lots
   maxRiskPerTradeType: 'percentage' | 'fiat';
-  maxRiskPerTradeValue: number; // e.g. 1.0 (%) or 500 ($)
+  maxRiskPerTradeValue: number; // e.g. 500 ($)
   maxDailyDrawdownR: number;    // e.g. 3.0 (-3R)
   maxDailyDrawdownFiat: number; // e.g. 1500 ($)
   dailyProfitTargetR?: number;  // e.g. 4.0 (+4R)
-  maxTradesPerDay: number;      // e.g. 4
 
-  // Session & Time Restrictions
-  allowedSessions: SessionType[];
+  // Main Question Asked When Journaling a Trade
+  mainJournalingQuestion: string;
+  journalingQuestionCategory?: string;
 
-  // Emotional & Psychological Defense
+  // Emotional & Structural Defenses
   prohibitedEmotions: NeuroState[];
-
-  // Structural & Golden Execution Rules
   structuralStopRequired: boolean;
   noWideningStops: boolean;
   requireCandleCloseConfirmation: boolean;
-  minPlannedRR: number;         // e.g. 2.0 (1:2 R:R)
   
-  // Custom checklist items defined by trader
+  // Custom checklist items
   customRules: {
     id: string;
     ruleText: string;
@@ -42,22 +49,27 @@ export const DEFAULT_USER_RULES: UserTradingRules = {
   userId: 'guest',
   tradingStyle: 'day_trader',
   primaryAssetClass: 'futures',
+  primaryStrategies: ['Fair Value Gap (FVG) & Liquidity Sweep', 'Opening Range Breakout (ORB)'],
+  customStrategyName: '',
+  minPlannedRR: 2.0,
+  allowedSessions: ['ny_am', 'ny_pm'],
+  maxTradesPerDay: 3,
+  maxContractsPerTrade: 2,
   maxRiskPerTradeType: 'fiat',
   maxRiskPerTradeValue: 500,
   maxDailyDrawdownR: 3.0,
   maxDailyDrawdownFiat: 1500,
   dailyProfitTargetR: 4.0,
-  maxTradesPerDay: 5,
-  allowedSessions: ['ny_am', 'ny_pm'],
+  mainJournalingQuestion: 'Did I wait for structural confirmation, or did I enter impulsively out of FOMO?',
+  journalingQuestionCategory: 'confirmation_vs_fomo',
   prohibitedEmotions: ['fomo_urge', 'revenge_tilted', 'chasing_price'],
   structuralStopRequired: true,
   noWideningStops: true,
   requireCandleCloseConfirmation: true,
-  minPlannedRR: 2.0,
   customRules: [
     { id: 'rule-wait-fvg', ruleText: 'Waited for Fair Value Gap / Liquidity sweep confirmation before pulling trigger', isMandatory: true },
     { id: 'rule-hard-stop', ruleText: 'Placed hard stop loss at structural swing level immediately upon fill', isMandatory: true },
-    { id: 'rule-no-chase', ruleText: 'Did not chase market order after 3+ consecutive extended bars', isMandatory: true },
+    { id: 'rule-max-trades', ruleText: 'Strictly halted trading after reaching maximum session trade count', isMandatory: true },
   ],
   isOnboardingCompleted: false,
   updatedAt: new Date().toISOString(),

@@ -14,6 +14,7 @@ import {
   Layers,
   ArrowLeftRight,
   Zap,
+  MessageSquare,
 } from 'lucide-react';
 import {
   Trade,
@@ -34,6 +35,7 @@ interface StreamlinedTradeLoggerModalProps {
   onClose: () => void;
   onSaveTrade: (trade: Trade) => void;
   initialExecution?: BrokerExecution | null;
+  mainJournalingQuestion?: string;
 }
 
 export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalProps> = ({
@@ -41,6 +43,7 @@ export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalPr
   onClose,
   onSaveTrade,
   initialExecution,
+  mainJournalingQuestion = 'Did I wait for structural confirmation, or did I enter impulsively out of FOMO?',
 }) => {
   // Step 1: Visual Setup & Fills | Step 2: Annotation & Diagnostics
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
@@ -754,6 +757,19 @@ export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalPr
           {/* STEP 2: ANNOTATION, DIAGNOSTICS & AUTOPSY */}
           {currentStep === 2 && (
             <div className="space-y-5 animate-fade-in font-mono text-xs">
+              {/* User's Core Autopsy Question Banner */}
+              <div className="bg-obsidian-card border border-trade-emerald/40 rounded-xl p-4 space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-2 text-trade-emerald">
+                  <MessageSquare className="w-4 h-4" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider font-mono">
+                    Your Core Autopsy Question
+                  </span>
+                </div>
+                <p className="text-sm font-sans italic text-white font-medium pl-6">
+                  "{mainJournalingQuestion}"
+                </p>
+              </div>
+
               {/* Compliance Pass / Fail Checklist */}
               <div className="bg-obsidian-base border border-obsidian-border rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between border-b border-obsidian-highlight pb-2">
