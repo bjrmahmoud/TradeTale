@@ -13,6 +13,7 @@ import {
   Columns,
   Layers,
   ArrowLeftRight,
+  Zap,
 } from 'lucide-react';
 import {
   Trade,
@@ -23,6 +24,8 @@ import {
   TradeMistake,
   RuleResponse,
 } from '../../types/trade';
+import { BrokerExecution } from '../../types/broker';
+import { BrokerService } from '../../services/brokerService';
 import { PLAYBOOK_SETUPS, UNIVERSAL_RULES, SYSTEM_MISTAKES } from '../../lib/constants';
 import { generatePreTradeChartSvg, generatePostTradeChartSvg } from '../../lib/chartGenerator';
 
@@ -30,15 +33,19 @@ interface StreamlinedTradeLoggerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSaveTrade: (trade: Trade) => void;
+  initialExecution?: BrokerExecution | null;
 }
 
 export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalProps> = ({
   isOpen,
   onClose,
   onSaveTrade,
+  initialExecution,
 }) => {
   // Step 1: Visual Setup & Fills | Step 2: Annotation & Diagnostics
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [brokerExecutions, setBrokerExecutions] = useState<BrokerExecution[]>([]);
+  const [syncedTicket, setSyncedTicket] = useState<string | null>(null);
 
   // Step 1: Execution & Fills
   const [instrument, setInstrument] = useState<string>('NQ');
@@ -79,6 +86,35 @@ export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalPr
   const [narrativeLesson, setNarrativeLesson] = useState<string>('');
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sync broker executions on modal open
+  useEffect(() => {
+    if (isOpen) {
+      const execs = BrokerService.getExecutions().filter((e) => !e.isImported);
+      setBrokerExecutions(execs);
+      if (initialExecution) {
+        handleApplyBrokerExecution(initialExecution);
+      }
+    }
+  }, [isOpen, initialExecution]);
+
+  const handleApplyBrokerExecution = (exec: BrokerExecution) => {
+    setInstrument(exec.instrument);
+    setAssetClass(exec.assetClass);
+    setDirection(exec.direction);
+    setExecutedEntry(exec.fillPrice);
+    setPlannedEntry(exec.fillPrice);
+    if (exec.stopPrice) {
+      setExecutedStop(exec.stopPrice);
+      setPlannedStop(exec.stopPrice);
+    }
+    if (exec.targetPrice) setPlannedTarget(exec.targetPrice);
+    if (exec.exitPrice) setExecutedExit(exec.exitPrice);
+    setPositionSize(exec.quantity);
+    if (exec.commission) setCommissionFees(exec.commission);
+    setSyncedTicket(exec.ticketId);
+    BrokerService.markExecutionAsImported(exec.id);
+  };
 
   // Mathematical Planned R:R
   const plannedRR = useMemo(() => {
@@ -356,6 +392,50 @@ export const StreamlinedTradeLoggerModal: React.FC<StreamlinedTradeLoggerModalPr
           {/* STEP 1: VISUAL SETUP & NUMERICAL FILLS */}
           {currentStep === 1 && (
             <div className="space-y-5 animate-fade-in">
+              {/* Real-Time Broker Auto-Fill Banner */}
+              {brokerExecutions.length > 0 && (
+                <div className="bg-obsidian-card border border-trade-emerald/30 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-trade-emerald/15 text-trade-emerald flex items-center justify-center font-bold">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-white">Live Broker Fills Detected</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-trade-emerald/20 text-trade-emerald font-semibold">
+                          {brokerExecutions.length} Ready
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-obsidian-slate">Auto-fill prices, size, timestamps and stops from linked accounts</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    {brokerExecutions.slice(0, 3).map((exec) => (
+                      <button
+                        key={exec.id}
+                        type="button"
+                        onClick={() => handleApplyBrokerExecution(exec)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition-all flex items-center gap-1.5 ${
+                          syncedTicket === exec.ticketId
+                            ? 'bg-trade-emerald text-obsidian-base border-trade-emerald font-bold'
+                            : 'bg-obsidian-base hover:bg-obsidian-highlight text-slate-200 border-obsidian-border'
+                        }`}
+                      >
+                        <span>⚡ {exec.instrument} {exec.direction.toUpperCase()} ({exec.fillPrice})</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {syncedTicket && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-trade-emerald/10 border border-trade-emerald/30 rounded-lg text-xs font-mono text-trade-emerald animate-fade-in">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Parameters auto-populated from broker order #{syncedTicket}. Ready for Act III Autopsy.</span>
+                </div>
+              )}
+
               {/* Dual-Image Interactive Comparison Canvas Preview */}
               <div className="bg-obsidian-base border border-obsidian-highlight rounded-xl p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">

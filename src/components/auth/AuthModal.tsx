@@ -18,12 +18,14 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: AuthMode;
+  onRegisterSuccess?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   initialMode = 'signin',
+  onRegisterSuccess,
 }) => {
   const { signInWithEmail, signUpWithEmail, signInAsGuest, signInWithGoogle, sendPasswordReset } =
     useAuth();
@@ -35,6 +37,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Sync mode with initialMode prop when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode);
+      setErrorMessage(null);
+      setSuccessMessage(null);
+    }
+  }, [isOpen, initialMode]);
 
   if (!isOpen) return null;
 
@@ -72,6 +83,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         await signInWithEmail(email.trim(), password);
       } else {
         await signUpWithEmail(email.trim(), password);
+        if (onRegisterSuccess) {
+          onRegisterSuccess();
+        }
       }
       onClose();
     } catch (err: any) {

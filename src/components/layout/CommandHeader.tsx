@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Search, Activity, RotateCcw, AlertTriangle, User, LogIn, LogOut } from 'lucide-react';
+import {
+  Shield,
+  Plus,
+  Search,
+  Activity,
+  RotateCcw,
+  AlertTriangle,
+  LogIn,
+  LogOut,
+  Zap,
+  Sliders,
+  Compass,
+  Menu,
+  X,
+  TrendingUp,
+  Layers,
+} from 'lucide-react';
 import { Trade } from '../../types/trade';
 import { AuthUser } from '../../types/auth';
 
@@ -16,6 +32,9 @@ interface CommandHeaderProps {
   user: AuthUser | null;
   onOpenAuth: () => void;
   onSignOut: () => void;
+  onOpenRules: () => void;
+  onOpenBrokerVault: () => void;
+  onGoToLanding: () => void;
 }
 
 export const CommandHeader: React.FC<CommandHeaderProps> = ({
@@ -31,8 +50,12 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
   user,
   onOpenAuth,
   onSignOut,
+  onOpenRules,
+  onOpenBrokerVault,
+  onGoToLanding,
 }) => {
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const update = () => {
@@ -45,7 +68,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
   }, []);
 
   // Compute Today's Total R and Net P&L
-  const todayTrades = trades.slice(0, 3); // top recent session trades
+  const todayTrades = trades.slice(0, 3);
   const totalDayR = todayTrades.reduce((acc, t) => acc + t.realizedR, 0);
   const totalDayFiat = todayTrades.reduce((acc, t) => acc + t.netPnl, 0);
 
@@ -68,35 +91,44 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
         </div>
       )}
 
-      <div className="max-w-[1720px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-[1720px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Brand Identity & Session Clock */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 sm:gap-5">
+          {/* Mobile Menu Hamburger Toggle */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-obsidian-slate hover:text-white rounded-lg hover:bg-obsidian-highlight transition-colors"
+            title="Toggle Navigation Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           <div
             onClick={() => setActiveTab('dashboard')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group"
           >
-            {/* Custom TT Logo uploaded by user */}
-            <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-obsidian-highlight bg-obsidian-base p-0.5 shadow-lg group-hover:border-trade-emerald transition-colors">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-lg overflow-hidden border border-obsidian-highlight bg-obsidian-base p-0.5 shadow-lg group-hover:border-trade-emerald transition-colors">
               <img
                 src="/logo.png"
-                alt="Tradestory Logo"
+                alt="TradeTale Logo"
                 className="w-full h-full object-contain"
                 onError={(e) => {
-                  // fallback icon if not yet found
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-sans font-bold text-white tracking-wider text-base">
+                <span className="font-sans font-bold text-white tracking-wider text-sm sm:text-base">
                   TRADESTORY
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-trade-emerald/15 text-trade-emerald border border-trade-emerald/30">
+                <span className="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.2 rounded bg-trade-emerald/15 text-trade-emerald border border-trade-emerald/30">
                   COMMAND
                 </span>
               </div>
-              <p className="text-[10px] font-mono text-obsidian-slate">EMPIRICAL POST-MORTEM</p>
+              <p className="text-[9px] sm:text-[10px] font-mono text-obsidian-slate hidden sm:block">
+                EMPIRICAL POST-MORTEM
+              </p>
             </div>
           </div>
 
@@ -121,11 +153,11 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           </div>
         </div>
 
-        {/* Center: Navigation Tabs */}
+        {/* Center: Desktop Navigation Tabs */}
         <nav className="hidden md:flex items-center bg-obsidian-base p-1 rounded-lg border border-obsidian-border">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
               activeTab === 'dashboard'
                 ? 'bg-obsidian-highlight text-white font-semibold shadow-sm'
                 : 'text-obsidian-slate hover:text-white'
@@ -135,7 +167,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('autopsy')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
               activeTab === 'autopsy'
                 ? 'bg-obsidian-highlight text-trade-emerald font-semibold shadow-sm'
                 : 'text-obsidian-slate hover:text-white'
@@ -145,7 +177,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
               activeTab === 'analytics'
                 ? 'bg-obsidian-highlight text-white font-semibold shadow-sm'
                 : 'text-obsidian-slate hover:text-white'
@@ -155,7 +187,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('playbook')}
-            className={`px-3.5 py-1.5 rounded-md text-xs font-mono transition-all ${
+            className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
               activeTab === 'playbook'
                 ? 'bg-obsidian-highlight text-white font-semibold shadow-sm'
                 : 'text-obsidian-slate hover:text-white'
@@ -166,7 +198,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
         </nav>
 
         {/* Right: Real-time Risk Gate & Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Daily Drawdown Meter */}
           <div className="hidden sm:flex flex-col items-end px-3 py-1 bg-obsidian-base border border-obsidian-highlight rounded-lg">
             <div className="flex items-center gap-2 text-[11px] font-mono">
@@ -185,7 +217,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
             {/* Mini Progress Bar for Drawdown */}
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[9px] font-mono text-obsidian-slate">Risk Gate</span>
-              <div className="w-24 h-1.5 bg-obsidian-highlight rounded-full overflow-hidden">
+              <div className="w-20 sm:w-24 h-1.5 bg-obsidian-highlight rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-300 ${
                     isGateBreached
@@ -203,6 +235,36 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
             </div>
           </div>
 
+          {/* Broker Vault Button */}
+          <button
+            onClick={onOpenBrokerVault}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-obsidian-base hover:bg-obsidian-highlight border border-obsidian-border hover:border-trade-emerald/40 rounded-lg text-xs font-mono text-slate-300 transition-colors"
+            title="Open Broker Connection Vault"
+          >
+            <Zap className="w-3.5 h-3.5 text-trade-emerald" />
+            <span className="hidden lg:inline">Vault</span>
+          </button>
+
+          {/* Dynamic Rule Builder Button */}
+          <button
+            onClick={onOpenRules}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-obsidian-base hover:bg-obsidian-highlight border border-obsidian-border hover:border-trade-cyan/40 rounded-lg text-xs font-mono text-slate-300 transition-colors"
+            title="Configure Personal Trading Rules"
+          >
+            <Shield className="w-3.5 h-3.5 text-trade-cyan" />
+            <span className="hidden lg:inline">Rules</span>
+          </button>
+
+          {/* Landing / Presentation Mode Toggle */}
+          <button
+            onClick={onGoToLanding}
+            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-obsidian-base hover:bg-obsidian-highlight border border-obsidian-border rounded-lg text-xs font-mono text-obsidian-slate hover:text-white transition-colors"
+            title="View Product Presentation / Landing Page"
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>Overview</span>
+          </button>
+
           {/* Global Search Hotkey Button */}
           <button
             onClick={onOpenSearch}
@@ -218,7 +280,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           {/* Reset Demo Button */}
           <button
             onClick={onResetDemo}
-            className="p-2 text-obsidian-slate hover:text-white hover:bg-obsidian-highlight rounded-lg transition-colors"
+            className="hidden sm:inline-flex p-2 text-obsidian-slate hover:text-white hover:bg-obsidian-highlight rounded-lg transition-colors"
             title="Reset to Benchmark Sample Trades"
           >
             <RotateCcw className="w-4 h-4" />
@@ -230,7 +292,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
               <div className="w-6 h-6 rounded-full bg-trade-emerald/20 text-trade-emerald flex items-center justify-center font-mono text-[11px] font-bold">
                 {user.email ? user.email[0].toUpperCase() : 'T'}
               </div>
-              <span className="hidden xl:inline-block text-xs font-mono text-slate-200 max-w-[120px] truncate">
+              <span className="hidden 2xl:inline-block text-xs font-mono text-slate-200 max-w-[100px] truncate">
                 {user.email}
               </span>
               <button
@@ -244,10 +306,10 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           ) : (
             <button
               onClick={onOpenAuth}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono bg-obsidian-base hover:bg-obsidian-highlight border border-trade-emerald/40 text-trade-emerald transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono bg-obsidian-base hover:bg-obsidian-highlight border border-trade-emerald/40 text-trade-emerald transition-colors"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
+              <span className="hidden sm:inline">Sign In</span>
             </button>
           )}
 
@@ -255,7 +317,7 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           <button
             onClick={onOpenLogger}
             disabled={isGateBreached}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all shadow-lg ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-all shadow-lg ${
               isGateBreached
                 ? 'bg-obsidian-border text-obsidian-slate cursor-not-allowed'
                 : 'bg-trade-emerald hover:bg-emerald-400 text-obsidian-base shadow-glow-emerald'
@@ -269,6 +331,90 @@ export const CommandHeader: React.FC<CommandHeaderProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Responsive Mobile Drawer / Navigation Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-obsidian-border bg-obsidian-base/98 px-4 py-4 space-y-3 font-mono text-xs animate-fade-in shadow-2xl">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                setActiveTab('dashboard');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-lg text-left ${
+                activeTab === 'dashboard' ? 'bg-trade-emerald/15 text-trade-emerald font-bold' : 'text-slate-300 bg-obsidian-card'
+              }`}
+            >
+              Daily Pulse
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('autopsy');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-lg text-left ${
+                activeTab === 'autopsy' ? 'bg-trade-emerald/15 text-trade-emerald font-bold' : 'text-slate-300 bg-obsidian-card'
+              }`}
+            >
+              Trade Autopsy
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('analytics');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-lg text-left ${
+                activeTab === 'analytics' ? 'bg-trade-emerald/15 text-trade-emerald font-bold' : 'text-slate-300 bg-obsidian-card'
+              }`}
+            >
+              Discipline & Edge
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('playbook');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`p-2.5 rounded-lg text-left ${
+                activeTab === 'playbook' ? 'bg-trade-emerald/15 text-trade-emerald font-bold' : 'text-slate-300 bg-obsidian-card'
+              }`}
+            >
+              Playbook Matrix
+            </button>
+          </div>
+
+          <div className="pt-2 border-t border-obsidian-border/60 flex items-center justify-between gap-2">
+            <button
+              onClick={() => {
+                onOpenBrokerVault();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex-1 py-2 px-2.5 rounded-lg bg-obsidian-card text-trade-emerald border border-trade-emerald/30 flex items-center justify-center gap-1.5"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Broker Vault</span>
+            </button>
+            <button
+              onClick={() => {
+                onOpenRules();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex-1 py-2 px-2.5 rounded-lg bg-obsidian-card text-trade-cyan border border-trade-cyan/30 flex items-center justify-center gap-1.5"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Rules Builder</span>
+            </button>
+            <button
+              onClick={() => {
+                onGoToLanding();
+                setIsMobileMenuOpen(false);
+              }}
+              className="py-2 px-3 rounded-lg bg-obsidian-card text-slate-300 border border-obsidian-border"
+            >
+              <Compass className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
